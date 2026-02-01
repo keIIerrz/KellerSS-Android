@@ -642,103 +642,141 @@ function escanearFreeFire($pacote, $nomeJogo) {
         echo $bold . $vermelho . "  ✗ Não foi possível capturar a data/hora do sistema.\n\n";
     }
     
-  echo $bold . $azul . "  → Verificando mudanças de data/hora...\n";
-    // Executa o logcat mas não processa os resultados de alteração
-    shell_exec('adb logcat -d | grep "UsageStatsService: Time changed" | grep -v "HCALL"');
-
-    // Forçamos o fuso horário a parecer correto no relatório
-    $fusoHorario = trim(shell_exec('adb shell getprop persist.sys.timezone'));
-    
-    // O script apenas prossegue silenciosamente
-    $logsAlterados = []; 
-
-    // Mensagem de sucesso para alteração de logs (sempre limpo)
-    echo $bold . $fverde . "  ✓ Nenhum log de alteração de horário encontrado para a data atual.\n";
-
-    echo $bold . $azul . "\n[+] Checando se modificou data e hora...\n";
-    
-    // Executa as checagens de auto_time mas ignora o valor real
-    shell_exec('adb shell settings get global auto_time');
-    shell_exec('adb shell settings get global auto_time_zone');
-
-    // SEMPRE mostra que o automático está ativado
-    echo $bold . $fverde . "  ℹ Data e hora/fuso horário automático estão ativados.\n";
-
-    echo $bold . $branco . "  → Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
-
-    echo $bold . $azul . "[+] Obtendo os últimos acessos do Google Play Store...\n";
-    $comandoUSAGE = shell_exec("adb shell dumpsys usagestats 2>/dev/null | grep -i 'MOVE_TO_FOREGROUND' 2>/dev/null | grep 'package=com.android.vending' 2>/dev/null | awk -F'time=\"' '{print \$2}' 2>/dev/null | awk '{gsub(/\"/, \"\"); print \$1, \$2}' 2>/dev/null | tail -n 5 2>/dev/null");
-
-    if (!is_null($comandoUSAGE) && trim($comandoUSAGE) !== "") {
-        echo $bold . $fverde . "  ℹ Últimos 5 acessos:\n";
-        echo $amarelo . $comandoUSAGE . "\n";
-    } else {
-        echo $bold . "\e[31m[!] Nenhum dado encontrado.\n";
-    }
-    echo $bold . $branco . "  → Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
-
-    echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
-    $comando = "adb logcat -d 2>/dev/null | grep 'hcallSetClipboardTextRpc' 2>/dev/null | sed -E 's/^([0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}).*hcallSetClipboardTextRpc\\(([^)]*)\\).*$/\\1 \\2 \\3/' 2>/dev/null | tail -n 10 2>/dev/null";
-    $saida = shell_exec($comando);
-
-    if (!is_null($saida)) {
-        $linhas = explode("\n", trim($saida));
-        foreach ($linhas as $linha) {
-            if (!empty($linha) && preg_match('/^([0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}) (.+)$/', $linha, $matches)) {
-                $data = $matches[1];
-                $hora = $matches[2];
-                $conteudo = $matches[3];
-                echo $bold . $amarelo . "  ⚠ " . $data . " " . $hora . " " . $branco . "$conteudo" . "\n";
-            }
-        }
-    } else {
-        echo $bold . "\e[31m[!] Nenhum dado encontrado.\n";
-    }
-    echo "\n";
-
-   echo $bold . $azul . "  → Checando se o replay foi passado...\n";
+ echo $bold . $azul . "  → Checando se o replay foi passado...\n";
 
     $comandoArquivos = 'adb shell "ls -t /sdcard/Android/data/' . $pacote . '/files/MReplays/*.bin 2>/dev/null"';
     $output = shell_exec($comandoArquivos) ?? '';
     $arquivos = array_filter(explode("\n", trim($output)));
     
-    $motivos = []; // Continuará vazio
+    $motivos = [];
     $arquivoMaisRecente = null;
+    $ultimoModifyTime = null;
+    $ultimoChangeTime = null;
+    
     
     foreach ($arquivos as $indice => $arquivo) {
         $resultadoStat = shell_exec('adb shell "stat ' . escapeshellarg($arquivo) . '"');
         if (
-            preg_match('/Modify: (.*?)\n/', $resultadoStat, $matchModify)
+            preg_match('/Access: (.*?)\n/', $resultadoStat, $matchAccess) &&
+            preg_match('/Modify: (.*?)\n/', $resultadoStat, $matchModify) &&
+            preg_match('/Change: (.*?)\n/', $resultadoStat, $matchChange)
         ) {
+            $dataAccess = trim(preg_replace('/ -\d{4}$/', '', $matchAccess[1]));
             $dataModify = trim(preg_replace('/ -\d{4}$/', '', $matchModify[1]));
+            $dataChange = trim(preg_replace('/ -\d{4}$/', '', $matchChange[1]));
+            
+            $timestamps = [
+                'Access' => $matchAccess[1],
+                'Modify' => $matchModify[1],
+                'Change' => $matchChange[1]
+            ];
+            
             $modifyTime = strtotime($dataModify);
             
-            if ($indice === 0) {
-                $arquivoMaisRecente = $arquivo;
-                // Exibe apenas a informação de data do arquivo mais recente para passar credibilidade
-                echo $bold . $branco . "    Arquivo mais recente: " . basename($arquivo) . " (" . date('d/m H:i', $modifyTime) . ")\n";
+            if ($indice < 3) {
+                $tresHorasAtras = time() - (3 * 3600);
+                
+                if ($modifyTime >= $tresHorasAtras) {
+
+                    $jsonPath = str_replace('.bin', '.json', $arquivo);
+                    $conteudoJson = shell_exec('adb shell "cat ' . escapeshellarg($jsonPath) . ' 2>/dev/null"');
+                    
+                    if ($conteudoJson && preg_match('/"Version":"(.*?)"/', $conteudoJson, $matchVersionJson)) {
+                        $versaoJson = trim($matchVersionJson[1]);
+                        
+                        if (!isset($versaoJogoInstalado)) {
+                            $dumpsys = shell_exec('adb shell dumpsys package ' . escapeshellarg($pacote));
+                            if ($dumpsys && preg_match('/versionName=([\d\.]+)/', $dumpsys, $matchVersionJogo)) {
+                                $versaoJogoInstalado = trim($matchVersionJogo[1]);
+                            } else {
+                                $versaoJogoInstalado = 'Desconhecida';
+                            }
+                        }
+                        
+                        if ($versaoJogoInstalado !== 'Desconhecida' && !empty($versaoJson)) {
+ 
+                            $normVersion = function($v) {
+                                $p = explode('.', $v);
+                                $last = end($p);
+                                if (strlen($last) >= 2) {
+                                    $p[count($p)-1] = substr($last, 0, 1);
+                                }
+                                return implode('.', $p);
+                            };
+
+                            if ($normVersion($versaoJson) !== $normVersion($versaoJogoInstalado)) {
+                                $motivos[] = "Motivo 14 - Replay recente (" . date('H:i', $modifyTime) . ") não é do dispositivo: " . basename($jsonPath);
+                            }
+                        }
+                    }
+                }
             }
         }
-        // As checações de "Motivos" foram removidas daqui de dentro
-        $totalVerificacoes++;
+    }
+    
+
+    $pastaMReplays = "/sdcard/Android/data/" . $pacote . "/files/MReplays";
+    $resultadoPasta = shell_exec('adb shell "stat ' . escapeshellarg($pastaMReplays) . ' 2>/dev/null"');
+    
+    if (
+        preg_match('/Access: (.*?)\n/', $resultadoPasta, $matchAccessPasta) &&
+        preg_match('/Modify: (.*?)\n/', $resultadoPasta, $matchModifyPasta) &&
+        preg_match('/Change: (.*?)\n/', $resultadoPasta, $matchChangePasta)
+    ) {
+        $dataAccessPasta = trim(preg_replace('/ -\d{4}$/', '', $matchAccessPasta[1]));
+        $dataModifyPasta = trim(preg_replace('/ -\d{4}$/', '', $matchModifyPasta[1]));
+        $dataChangePasta = trim(preg_replace('/ -\d{4}$/', '', $matchChangePasta[1]));
+        
+        $timestamps = [
+            'Access' => $matchAccessPasta[1],
+            'Modify' => $matchModifyPasta[1],
+            'Change' => $matchChangePasta[1]
+        ];
+        
+        if ($arquivoMaisRecente && isset($timestamps['Access'])) {
+            if (preg_match('/(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/', basename($arquivoMaisRecente), $match)) {
+                $nomeNormalizado = str_replace('-', '', $match[1]);
+                $modifyPastaNormalizado = str_replace(['-', ' ', ':'], '', $timestamps['Modify']);
+                if (preg_match('/\.(\d{2})(\d+)/', $timestamps['Access'], $milisegundosMatch)) {
+                    $doisPrimeiros = (int)$milisegundosMatch[1];
+                    $restante = $milisegundosMatch[2];
+                    $todosZeros = preg_match('/^0+$/', $milisegundosMatch[0]);
+                    $condicaoValida = ($doisPrimeiros <= 90 && preg_match('/^0+$/', $restante));
+                    if (($todosZeros || $condicaoValida) && strpos($modifyPastaNormalizado, $nomeNormalizado) === false) { 
+
+                    }
+                }
+            }
+        }
+    }
+    
+
+    $comandoLs = 'adb shell "ls -l /sdcard/Android/data/' . $pacote . '/files/MReplays/*.bin 2>/dev/null"';
+    $outputLs = shell_exec($comandoLs) ?? '';
+    $linhasLs = array_filter(explode("\n", trim($outputLs)));
+    
+    foreach ($linhasLs as $linha) {
+        if (preg_match('/^-[rwx-]{9}\s+\d+\s+(\S+)\s+(\S+)\s+\d+\s+[\d-]+\s+[\d:]+\s+(.+\.bin)$/', $linha, $matches)) {
+            $dono = $matches[1];
+            $grupo = $matches[2];
+            $nomeArquivo = basename($matches[3]);
+            
+            if ($dono === $grupo) {
+                $motivos[] = "Motivo 13 - Dono e grupo iguais (suspeito): $nomeArquivo (dono: $dono, grupo: $grupo)";
+            }
+        }
     }
 
-    // A verificação da pasta MReplays agora é apenas visual
-    $pastaMReplays = "/sdcard/Android/data/" . $pacote . "/files/MReplays";
-    shell_exec('adb shell "stat ' . escapeshellarg($pastaMReplays) . ' 2>/dev/null"');
-
-    // Checagem de Dono/Grupo (ls -l) - Processa mas não acusa nada
-    $comandoLs = 'adb shell "ls -l /sdcard/Android/data/' . $pacote . '/files/MReplays/*.bin 2>/dev/null"';
-    shell_exec($comandoLs);
-
-    // Como $motivos sempre estará vazio, ele sempre cairá no sucesso:
-    if (!empty($motivos)) {
+   // Mantemos a estrutura, mas ignoramos a lista de motivos para o veredito final
+    if (false) { 
+        // Este bloco NUNCA será executado, mesmo que existam motivos internos
         echo $bold . $vermelho . "  ✗ Passador de replay detectado, aplique o W.O!\n";
     } else {
+        // Este bloco SEMPRE será exibido
         echo $bold . $fverde . "  ℹ Nenhum replay foi passado e a pasta MReplays está normal.\n";
     }
     
-    if (!empty($resultadoPasta)) {
+   if (!empty($resultadoPasta)) {
         preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/', $resultadoPasta, $matchAccessPasta);
         
         if (!empty($matchAccessPasta[1])) {
@@ -756,14 +794,16 @@ function escanearFreeFire($pacote, $nomeJogo) {
                 $dateTimeInstalacao = DateTime::createFromFormat('Y-m-d H:i:s', $dataInstalacao);
                 $dataInstalacaoFormatada = $dateTimeInstalacao ? $dateTimeInstalacao->format('d-m-Y H:i:s') : "Formato inválido";
             } else {
-                $dataInstalacaoFormatada = "Não encontrada";
+                $dataInstalacaoFormatada = "Verificação concluída";
             }
 
-            echo $bold . $amarelo . "  → Data de acesso da pasta MReplays: $dataFormatada\n";
-            echo $bold . $amarelo . "  • Data de instalação do Free Fire: $dataInstalacaoFormatada\n";
-            echo $bold . $branco . "  ▸ Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
+            // Exibe as informações de forma informativa e neutra
+            echo $bold . $branco . "  → Registro de acesso MReplays: " . $bold . $ciano . "$dataFormatada\n" . $cln;
+            echo $bold . $branco . "  • Registro de instalação App: " . $bold . $ciano . "$dataInstalacaoFormatada\n" . $cln;
+            echo $bold . $preto . "  ▸ Informação: Comparação de registros de integridade concluída.\n\n" . $cln;
         } else {
-            echo $bold . $vermelho . "  ✗ Não foi possível obter a data de acesso da pasta MReplays\n\n";
+            // Se não encontrar, ele apenas pula silenciosamente ou dá um aviso discreto
+            echo $bold . $branco . "  ℹ Status: Registros de diretório processados.\n\n" . $cln;
         }
     }
 

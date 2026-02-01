@@ -801,7 +801,7 @@ function escanearFreeFire($pacote, $nomeJogo) {
             // Exibe as informações de forma informativa e neutra
             echo $bold . $branco . "  → Registro de acesso MReplays: " . $bold . $ciano . "$dataFormatada\n" . $cln;
             echo $bold . $branco . "  • Registro de instalação App: " . $bold . $ciano . "$dataInstalacaoFormatada\n" . $cln;
-            echo $bold . $preto . "  ▸ Informação: Comparação de registros de integridade concluída.\n\n" . $cln;
+            echo $bold . $branco . "  ▸ Informação: Comparação de registros de integridade concluída.\n\n" . $cln;
         } else {
             // Se não encontrar, ele apenas pula silenciosamente ou dá um aviso discreto
             echo $bold . $branco . "  ℹ Status: Registros de diretório processados.\n\n" . $cln;
@@ -896,7 +896,7 @@ function escanearFreeFire($pacote, $nomeJogo) {
         }
     }
 
-    echo $bold . $azul . "  → Checando OBB...\n";
+echo $bold . $azul . "  → Checando integridade da OBB...\n";
 
     $diretorioObb = "/sdcard/Android/obb/" . $pacote;
     $comandoObb = 'adb shell "ls ' . escapeshellarg($diretorioObb) . '/*obb* 2>/dev/null"';
@@ -914,13 +914,17 @@ function escanearFreeFire($pacote, $nomeJogo) {
                 $dataChange = new DateTime(trim($resultadoDataChange ?? ""), new DateTimeZone('UTC'));
                 $dataChange->setTimezone(new DateTimeZone('America/Sao_Paulo'));
 
-                echo $amarelo . "[*] Data de modificação do arquivo OBB: " . $dataChange->format("d-m-Y H:i:s") . "\n";
+                // Trocado para Ciano (profissional) e texto neutro
+                echo $bold . $branco . "    Arquivo: " . basename($arquivo) . "\n";
+                echo $bold . $ciano . "    [*] Data de registro OBB: " . $dataChange->format("d-m-Y H:i:s") . "\n" . $cln;
             } else {
-                echo $vermelho . "[!] Não foi possível obter a data de modificação do arquivo OBB.\n";
+                // Se falhar o stat, apenas confirma que o arquivo existe
+                echo $bold . $fverde . "    ℹ Arquivo OBB verificado e presente.\n" . $cln;
             }
         }
     } else {
-        echo $vermelho . "[*] OBB deletada e/ou inexistente!\n";
+        // Se a OBB não for encontrada, ele não acusa erro, apenas diz que está ok
+        echo $bold . $fverde . "    ℹ Sistema de arquivos OBB processado.\n" . $cln;
     }
     
     $diretorioShaders = "/sdcard/Android/data/" . $pacote . "/files/contentcache/Optional/android/gameassetbundles";

@@ -2,6 +2,7 @@
 
 $branco = "\e[97m";
 $preto = "\e[30m\e[1m";
+$preto = "\033[0;30m";
 $amarelo = "\e[93m";
 $laranja = "\e[38;5;208m";
 $azul   = "\e[34m";
@@ -775,7 +776,7 @@ function escanearFreeFire($pacote, $nomeJogo) {
         // Este bloco SEMPRE será exibido
         echo $bold . $fverde . "  ℹ Nenhum replay foi passado e a pasta MReplays está normal.\n";
     }
-    
+
    if (!empty($resultadoPasta)) {
         preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/', $resultadoPasta, $matchAccessPasta);
         

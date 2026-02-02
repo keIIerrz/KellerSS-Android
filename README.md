@@ -55,21 +55,21 @@ O projeto tem como principal função facilitar o trabalho dos analistas em suas
 #### <img width="2%" src="https://simpleicons.org/icons/termius.svg">&emsp13; Após abrir o Termux, dividindo a tela com o pareamento wifi aberto, rode os comandos abaixo:
 
 ```sh
-❯ adb pair localhost:porta codigopareamento
+ adb pair localhost:porta codigopareamento
 
 ```
 
 #### <img width="2%" src="https://simpleicons.org/icons/termius.svg">&emsp13; Após parear, a porta irá atualizar, então suba nas opções e confira a nova porta.
 
 ```sh
-❯ adb connect localhost:portaatualizada
+ adb connect localhost:portaatualizada
 
 ```
 
 #### <img width="2%" src="https://simpleicons.org/icons/termius.svg">&emsp13; Após parear e conectar corretamente, só rodar o código que irá baixar e executar o scanner.
 
 ```sh
-❯ pkg install git php android-tools -y && rm -rf KellerSS-Android && git clone https://github.com/keIIerrz/KellerSS-Android && cd KellerSS-Android && php KellerSS.php
+ pkg install git php android-tools -y && rm -rf KellerSS-Android && git clone https://github.com/keIIerrz/KellerSS-Android && cd KellerSS-Android && php KellerSS.php
 
 ```
 

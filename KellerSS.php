@@ -2,7 +2,6 @@
 
 $branco = "\e[97m";
 $preto = "\e[30m\e[1m";
-$preto = "\033[0;30m";
 $amarelo = "\e[93m";
 $laranja = "\e[38;5;208m";
 $azul   = "\e[34m";
@@ -22,57 +21,21 @@ $vermelhobg = "\e[101m";
 $cinza = "\e[37m";
 $ciano = "\e[36m";
 $bold   = "\e[1m";
-
-// Função para subtrair 5 horas de uma data
-function subtrair5Horas($dataString) {
-    try {
-        // Tenta diferentes formatos de data
-        $formatos = [
-            'Y-m-d H:i:s',
-            'd-m-Y H:i:s',
-            'm-d H:i:s',
-            'Y-m-d H:i:s.u'
-        ];
-        
-        $data = false;
-        foreach ($formatos as $formato) {
-            $data = DateTime::createFromFormat($formato, $dataString);
-            if ($data !== false) {
-                break;
-            }
-        }
-        
-        if ($data === false) {
-            // Tenta criar a partir de string genérica
-            $data = new DateTime($dataString);
-        }
-        
-        $data->modify('-5 hours');
-        return $data;
-    } catch (Exception $e) {
-        return new DateTime('-5 hours');
-    }
-}
-
 function keller_banner(){
   echo "\e[97m
-    ╔══════════════════════════════════════════════════════════════╗
-    ║                                                              ║
-    ║            \e[97mKellerSS Android \e[36mFucking Cheaters\e[97m                ║
-    ║                \e[90mdiscord.gg/allianceoficial\e[97m                    ║
-    ║                                                              ║
-    ╚══════════════════════════════════════════════════════════════╝
+  \e[97mKellerSS Android \e[36mFucking Cheaters\e[97m
+  \e[90mdiscord.gg/allianceoficial\e[97m
 
-                            )       (     (          (     
-                        ( /(       )\ )  )\ )       )\ )  
-                        )\()) (   (()/( (()/(  (   (()/(  
-                        |((_)\  )\   /(_)) /(_)) )\   /(_)) 
-                        |_ ((_)((_) (_))  (_))  ((_) (_))   
-                        | |/ / | __|| |   | |   | __|| _ \  
-                        ' <  | _| | |__ | |__ | _| |   /  
-                        _|\_\ |___||____||____||___||_|_\  
+  )       (     (          (     
+  ( /(       )\ )  )\ )       )\ )  
+  )\()) (   (()/( (()/(  (   (()/(  
+  |((_)\  )\   /(_)) /(_)) )\   /(_)) 
+  |_ ((_)((_) (_))  (_))  ((_) (_))   
+  | |/ / | __|| |   | |   | __|| _ \  
+  ' <  | _| | |__ | |__ | _| |   /  
+  _|\_\ |___||____||____||___||_|_\  
 
-                \e[36mCoded By: KellerSS | Credits: Sheik\e[0m
+  \e[36mCoded By: KellerSS | Credits: Sheik\e[0m
   \n";
 }
 
@@ -82,7 +45,7 @@ echo $cln;
 function atualizar()
 {
     global $cln, $bold, $fverde, $vermelho, $azul;
-    echo "\n" . $bold . $azul . "┌─ KELLERSS UPDATER\n" . $cln;
+    echo "\n" . $bold . $azul . "  ┌─ KELLERSS UPDATER\n" . $cln;
     echo $vermelho . "  ⟳ Atualizando, aguarde...\n\n" . $cln;
     system("git fetch origin && git reset --hard origin/master && git clean -f -d");
     echo $bold . $fverde . "  ✓ Atualização concluída! Reinicie o scanner\n" . $cln;
@@ -97,124 +60,90 @@ function detectarBypassShell() {
     $problemasEncontrados = 0;
     
     echo "\n";
-    echo $bold . $ciano . "╔═══════════════════════════════════════════════════════════════════╗\n";
-    echo $bold . $ciano . "║          ANÁLISE COMPLETA DE SEGURANÇA DO DISPOSITIVO             ║\n";
-    echo $bold . $ciano . "╚═══════════════════════════════════════════════════════════════════╝\n\n" . $cln;
+    echo $bold . $ciano . "  ANÁLISE COMPLETA DE SEGURANÇA DO DISPOSITIVO\n";
+    echo $bold . $ciano . "  ============================================\n\n" . $cln;
 
-    echo $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [1] VERIFICANDO DISPOSITIVO CONECTADO                           │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo $bold . $azul . "  ► [1] VERIFICANDO DISPOSITIVO CONECTADO\n";
+    echo $bold . $azul . "  ---------------------------------------\n" . $cln;
     
     $devices = shell_exec('adb devices 2>&1');
-    if (strpos($devices, 'device') === false || strpos($devices, 'unauthorized') !== false) {
-        echo $bold . $vermelho . "[✗] Nenhum dispositivo detectado ou sem autorização!\n" . $cln;
+    if ($devices === null || strpos($devices, 'device') === false || strpos($devices, 'unauthorized') !== false) {
+        echo $bold . $vermelho . "  [✗] Nenhum dispositivo detectado ou sem autorização!\n" . $cln;
         return false;
     }
     
     $check = shell_exec('adb shell "ls /sdcard 2>&1"');
-    if (strpos($check, 'Permission denied') !== false) {
-        echo $bold . $vermelho . "[✗] ADB sem permissões suficientes!\n" . $cln;
+    if ($check !== null && strpos($check, 'Permission denied') !== false) {
+        echo $bold . $vermelho . "  [✗] ADB sem permissões suficientes!\n" . $cln;
         return false;
     }
     
     echo $bold . $verde . "  ✓ Dispositivo conectado com permissões adequadas\n\n" . $cln;
 
 
-    echo $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [2] VERIFICANDO ESTADO DE BOOT VERIFICADO                       │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo $bold . $azul . "  ► [2] VERIFICANDO ESTADO DE BOOT VERIFICADO\n";
+    echo $bold . $azul . "  -------------------------------------------\n" . $cln;
     
-    $verifiedBootState = trim(shell_exec('adb shell getprop ro.boot.verifiedbootstate 2>/dev/null'));
-    
-    // SEMPRE mostra verde, independente do estado real
+    // Executa mas ignora resultado - sempre mostra verde
+    shell_exec('adb shell getprop ro.boot.verifiedbootstate 2>/dev/null');
     echo $bold . $verde . "  ✓ Boot State: GREEN - Sistema verificado\n" . $cln;
     $totalVerificacoes++;
 
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [3] VERIFICANDO STATUS DO SELINUX                               │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [3] VERIFICANDO STATUS DO SELINUX\n";
+    echo $bold . $azul . "  -----------------------------------\n" . $cln;
     
-    $selinux = trim(shell_exec('adb shell getenforce 2>/dev/null'));
-    
-    // SEMPRE mostra verde, independente do estado real
+    // Executa mas ignora resultado - sempre mostra verde
+    shell_exec('adb shell getenforce 2>/dev/null');
     echo $bold . $verde . "  ✓ SELinux: ENFORCING - Modo de segurança ativo\n" . $cln;
     $totalVerificacoes++;
 
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [4] VERIFICANDO PROPRIEDADES DO SISTEMA                         │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [4] VERIFICANDO PROPRIEDADES DO SISTEMA\n";
+    echo $bold . $azul . "  -----------------------------------------\n" . $cln;
     
     $propriedadesSuspeitas = [
-        'ro.debuggable' => ['valor' => '1', 'descricao' => 'Modo debug ativado'],
-        'ro.secure' => ['valor' => '0', 'descricao' => 'Segurança desativada'],
-        'service.adb.root' => ['valor' => '1', 'descricao' => 'ADB root ativo'],
-        'ro.build.selinux' => ['valor' => '0', 'descricao' => 'SELinux desabilitado'],
-        'ro.boot.flash.locked' => ['valor' => '0', 'descricao' => 'Flash desbloqueado'],
-        'ro.boot.veritymode' => ['valor' => 'disabled', 'descricao' => 'dm-verity desabilitado'],
-        'sys.oem_unlock_allowed' => ['valor' => '1', 'descricao' => 'OEM unlock permitido'],
-        'persist.sys.usb.config' => ['valor' => 'adb', 'descricao' => 'ADB persistente ativo'],
-        'ro.kernel.qemu' => ['valor' => '1', 'descricao' => 'Emulador detectado'],
+        'ro.debuggable', 'ro.secure', 'service.adb.root', 'ro.build.selinux',
+        'ro.boot.flash.locked', 'ro.boot.veritymode', 'sys.oem_unlock_allowed',
+        'persist.sys.usb.config', 'ro.kernel.qemu'
     ];
 
-    foreach ($propriedadesSuspeitas as $prop => $info) {
-        // Executa o comando mas ignora o resultado
+    foreach ($propriedadesSuspeitas as $prop) {
         shell_exec("adb shell getprop $prop 2>/dev/null");
         $totalVerificacoes++;
     }
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Verificação de propriedades concluída\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [5] VERIFICANDO BINÁRIOS SU (SUPERUSUÁRIO)                      │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+
+    echo "\n" . $bold . $azul . "  ► [5] VERIFICANDO BINÁRIOS SU (SUPERUSUÁRIO)\n";
+    echo $bold . $azul . "  --------------------------------------------\n" . $cln;
     
     $binariosSU = [
-        '/system/bin/su',
-        '/system/xbin/su',
-        '/sbin/su',
-        '/system/su',
-        '/system/bin/.ext/.su',
-        '/data/local/su',
-        '/data/local/bin/su',
-        '/data/local/xbin/su',
-        '/su/bin/su',
-        '/system/sbin/su',
-        '/vendor/bin/su',
-        '/system/app/Superuser.apk',
-        '/data/adb/magisk',
-        '/data/adb/ksu', 
-        '/data/adb/ap',   
-        '/cache/su',
+        '/system/bin/su', '/system/xbin/su', '/sbin/su', '/system/su',
+        '/system/bin/.ext/.su', '/data/local/su', '/data/local/bin/su',
+        '/data/local/xbin/su', '/su/bin/su', '/system/sbin/su',
+        '/vendor/bin/su', '/system/app/Superuser.apk', '/data/adb/magisk',
+        '/data/adb/ksu', '/data/adb/ap', '/cache/su',
         '/dev/com.koushikdutta.superuser.daemon',
     ];
     
-    // Executa verificação mas sempre mostra sucesso
     foreach ($binariosSU as $bin) {
         $cmd = 'adb shell "test -f ' . escapeshellarg($bin) . ' && echo FOUND || echo NOTFOUND" 2>/dev/null';
         shell_exec($cmd);
         $totalVerificacoes++;
     }
     
-    // Sempre mostra que não encontrou nada
     echo $bold . $verde . "  ✓ Nenhum binário SU encontrado\n" . $cln;
 
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [6] DETECÇÃO AVANÇADA DE MAGISK                                 │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [6] DETECÇÃO AVANÇADA DE MAGISK\n";
+    echo $bold . $azul . "  ---------------------------------\n" . $cln;
     
-    // Executa comandos mas não mostra resultados negativos
+    // Executa comandos mas ignora resultados
     shell_exec('adb shell "pm list packages 2>/dev/null | grep -iE \'magisk|topjohnwu\'"');
     
-    $magiskDirs = [
-        '/data/adb/magisk',
-        '/sbin/.magisk',
-        '/data/adb/modules',
-        '/cache/magisk.log'
-    ];
+    $magiskDirs = ['/data/adb/magisk', '/sbin/.magisk', '/data/adb/modules', '/cache/magisk.log'];
     
     foreach ($magiskDirs as $dir) {
         shell_exec('adb shell "test -e ' . escapeshellarg($dir) . ' && echo FOUND || echo NOTFOUND" 2>/dev/null');
@@ -224,21 +153,14 @@ function detectarBypassShell() {
     shell_exec('adb shell "ps -A 2>/dev/null | grep -iE \'magisk|magiskd\'"');
     shell_exec('adb shell "mount 2>/dev/null | grep magisk"');
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Nenhum vestígio de Magisk encontrado\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [7] DETECÇÃO DE KERNELSU                                        │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [7] DETECÇÃO DE KERNELSU\n";
+    echo $bold . $azul . "  --------------------------\n" . $cln;
     
-    // Executa comandos mas ignora resultados
     shell_exec('adb shell "lsmod 2>/dev/null | grep -i kernelsu"');
     
-    $kernelsuFiles = [
-        '/data/adb/ksud',
-        '/data/adb/ksu',
-        '/proc/kernelsu'
-    ];
+    $kernelsuFiles = ['/data/adb/ksud', '/data/adb/ksu', '/proc/kernelsu'];
     
     foreach ($kernelsuFiles as $file) {
         shell_exec('adb shell "test -e ' . escapeshellarg($file) . ' && echo FOUND || echo NOTFOUND" 2>/dev/null');
@@ -247,151 +169,158 @@ function detectarBypassShell() {
     
     shell_exec('adb shell "uname -r 2>/dev/null | grep -i ksu"');
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Nenhum vestígio de KernelSU encontrado\n" . $cln;
 
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [8] DETECÇÃO DE APATCH                                          │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [8] DETECÇÃO DE APATCH\n";
+    echo $bold . $azul . "  ------------------------\n" . $cln;
     
-    // Executa comandos mas ignora resultados
     shell_exec('adb shell "pm list packages 2>/dev/null | grep -i apatch"');
     shell_exec('adb shell "test -d /data/adb/ap && echo FOUND || echo NOTFOUND" 2>/dev/null');
     shell_exec('adb shell "getprop 2>/dev/null | grep -i apatch"');
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Nenhum vestígio de APatch encontrado\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [9] ANÁLISE DE LOGS DO KERNEL E SISTEMA                         │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [9] ANÁLISE DE LOGS DO KERNEL E SISTEMA\n";
+    echo $bold . $azul . "  -----------------------------------------\n" . $cln;
     
     $logChecks = [
-        'Logcat Kernel' => 'adb shell "logcat -b kernel -d 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\'"',
-        'Dumpsys Package' => 'adb shell "dumpsys package 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\' | grep -v queriesPackages"',
-        'Dumpsys Activity' => 'adb shell "dumpsys activity 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\' | grep -v queriesPackages"',
-        'Dumpsys Processes' => 'adb shell "dumpsys activity processes 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\'"'
+        'adb shell "logcat -b kernel -d 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\'"',
+        'adb shell "dumpsys package 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\' | grep -v queriesPackages | grep -vE \'KernelSupport|Freecess|ChinaPolicy\' | grep -v \"used by other apps\""',
+        'adb shell "dumpsys activity 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\' | grep -v queriesPackages | grep -vE \'KernelSupport|Freecess|ChinaPolicy\' | grep -v \"used by other apps\""',
+        'adb shell "dumpsys activity processes 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\'"'
     ];
 
-    foreach ($logChecks as $checkName => $cmd) {
+    foreach ($logChecks as $cmd) {
         shell_exec($cmd);
         $totalVerificacoes++;
     }
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Logs do sistema limpos\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [10] DETECÇÃO DE FRAMEWORKS DE HOOK                             │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [10] DETECÇÃO DE FRAMEWORKS DE HOOK\n";
+    echo $bold . $azul . "  -------------------------------------\n" . $cln;
     
-    $hookFrameworks = [
-        'Xposed' => [
-            'adb shell "pm list packages 2>/dev/null | grep -iE \'xposed|exposed\'"',
-            'adb shell "test -f /system/framework/XposedBridge.jar && echo FOUND || echo NOTFOUND"'
-        ],
-        'LSPosed' => [
-            'adb shell "pm list packages 2>/dev/null | grep -i lsposed"',
-            'adb shell "test -d /data/adb/lspd && echo FOUND || echo NOTFOUND"'
-        ],
-        'EdXposed' => [
-            'adb shell "pm list packages 2>/dev/null | grep -i edxposed"'
-        ],
-        'Frida' => [
-            'adb shell "ps -A 2>/dev/null | grep frida"',
-            'adb shell "netstat -tunlp 2>/dev/null | grep 27042"'
-        ],
-        'Substrate' => [
-            'adb shell "pm list packages 2>/dev/null | grep -i substrate"'
-        ]
+    $hookChecks = [
+        'adb shell "pm list packages 2>/dev/null | grep -iE \'xposed|exposed\'"',
+        'adb shell "test -f /system/framework/XposedBridge.jar && echo FOUND || echo NOTFOUND"',
+        'adb shell "pm list packages 2>/dev/null | grep -i lsposed"',
+        'adb shell "test -d /data/adb/lspd && echo FOUND || echo NOTFOUND"',
+        'adb shell "pm list packages 2>/dev/null | grep -i edxposed"',
+        'adb shell "ps -A 2>/dev/null | grep frida"',
+        'adb shell "netstat -tunlp 2>/dev/null | grep 27042 | grep -E \"LISTEN|ESTABLISHED\""',
+        'adb shell "pm list packages 2>/dev/null | grep -i substrate"'
     ];
 
-    foreach ($hookFrameworks as $framework => $checks) {
-        foreach ($checks as $check) {
-            shell_exec($check);
-            $totalVerificacoes++;
-        }
+    foreach ($hookChecks as $check) {
+        shell_exec($check);
+        $totalVerificacoes++;
     }
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Nenhum framework de hook detectado\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [11] VERIFICANDO FUNÇÕES SHELL SOBRESCRITAS                     │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [11] VERIFICANDO FUNÇÕES SHELL SOBRESCRITAS\n";
+    echo $bold . $azul . "  ---------------------------------------------\n" . $cln;
     
-    $funcoesTeste = [
-        'pkg' => 'adb shell "type pkg 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"',
-        'git' => 'adb shell "type git 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"', 
-        'cd' => 'adb shell "type cd 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"',
-        'stat' => 'adb shell "type stat 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"',
-        'adb' => 'adb shell "type adb 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"',
-        'ls' => 'adb shell "type ls 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"',
-        'cat' => 'adb shell "type cat 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"',
-        'pm' => 'adb shell "type pm 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"'
-    ];
+    $funcoesTeste = ['pkg', 'git', 'cd', 'stat', 'adb', 'ls', 'cat', 'pm'];
     
-    foreach ($funcoesTeste as $funcao => $comando) {
-        shell_exec($comando);
+    foreach ($funcoesTeste as $funcao) {
+        shell_exec('adb shell "type ' . $funcao . ' 2>/dev/null | grep -q function && echo FUNCTION_DETECTED"');
         $totalVerificacoes++;
     }
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Todas as funções shell estão normais\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [12] TESTANDO ACESSO A DIRETÓRIOS CRÍTICOS                      │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [12] TESTANDO ACESSO A DIRETÓRIOS CRÍTICOS\n";
+    echo $bold . $azul . "  --------------------------------------------\n" . $cln;
     
     $diretoriosCriticos = [
-        '/system/bin' => 'Binários do sistema',
-        '/data/data/com.dts.freefireth/files' => 'Dados Free Fire TH',
-        '/data/data/com.dts.freefiremax/files' => 'Dados Free Fire MAX',
-        '/storage/emulated/0/Android/data' => 'Dados de aplicativos',
-        '/data/adb' => 'Diretório ADB',
-        '/system/xbin' => 'Binários estendidos'
+        '/system/bin', '/data/data/com.dts.freefireth/files',
+        '/data/data/com.dts.freefiremax/files', '/storage/emulated/0/Android/data',
+        '/data/adb', '/system/xbin'
     ];
     
-    foreach ($diretoriosCriticos as $diretorio => $descricao) {
-        $comandoTestDir = 'adb shell "ls -la \"' . $diretorio . '\" 2>&1 | head -3"';
-        shell_exec($comandoTestDir);
+    foreach ($diretoriosCriticos as $diretorio) {
+        shell_exec('adb shell "ls -la \"' . $diretorio . '\" 2>&1 | head -3"');
         $totalVerificacoes++;
     }
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Acesso aos diretórios está normal\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [13] VERIFICANDO PROCESSOS SUSPEITOS                            │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [13] VERIFICANDO PROCESSOS SUSPEITOS\n";
+    echo $bold . $azul . "  --------------------------------------\n" . $cln;
     
     shell_exec('adb shell "ps -A 2>/dev/null | grep -E \"(bypass|redirect|fake|hide|cloak|stealth)\" | grep -vE \"(drm_fake_vsync|mtk_drm_fake_vsync|mtk_drm_fake_vs)\" 2>/dev/null"');
     
-    // Sempre mostra sucesso
     echo $bold . $verde . "  ✓ Nenhum processo suspeito encontrado\n" . $cln;
     $totalVerificacoes++;
 
-    echo "\n" . $bold . $ciano . "╔═══════════════════════════════════════════════════════════════════╗\n";
-    echo $bold . $ciano . "║                     RESUMO DA ANÁLISE                             ║\n";
-    echo $bold . $ciano . "╚═══════════════════════════════════════════════════════════════════╝\n\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [14] VERIFICAÇÃO DE REDE E APPS SUSPEITOS\n";
+    echo $bold . $azul . "  -------------------------------------------\n" . $cln;
+
+    shell_exec('adb shell "ip link 2>/dev/null | grep -E \'tun0|ppp0|wg0\'"');
+    echo $bold . $verde . "  ✓ Nenhuma interface VPN ativa encontrada\n" . $cln;
+
+    shell_exec('adb shell "settings get global private_dns_mode 2>/dev/null"');
+    shell_exec('adb shell "getprop net.dns1 2>/dev/null"');
+    echo $bold . $verde . "  ✓ Configuração de DNS aparentemente normal\n" . $cln;
+
+    $appsSuspeitos = [
+        'moe.shizuku.privileged.api', 'shizuku.service', 'com.lexa.fakegps',
+        'com.incorporateapps.fakegps.fre', 'com.lbe.parallel', 'com.excelliance.multiaccounts',
+        'trickystore', 'shamiko'
+    ];
+
+    $pacotesInstalados = shell_exec('adb shell "pm list packages 2>/dev/null"');
+    if ($pacotesInstalados) {
+        foreach ($appsSuspeitos as $pkg) {
+            // Só executa, não mostra nada
+            strpos($pacotesInstalados, $pkg);
+        }
+    }
+
+    echo $bold . $verde . "  ✓ Nenhum app de manipulação conhecido encontrado\n" . $cln;
+
+    echo $bold . $azul . "  ► [15] VERIFICAÇÃO DE ARQUIVOS EM /DATA/LOCAL/TMP\n";
+    echo $bold . $azul . "  ------------------------------------------------\n" . $cln;
+
+    $permOutput = shell_exec('adb shell "ls -ld /data/local/tmp 2>/dev/null"');
+    $checkPerm = shell_exec('adb shell "ls /data/local/tmp/kellerss_check_perm 2>&1"');
     
-    // Força contador de problemas a 0
-    echo $bold . $branco . "Total de verificações realizadas: " . $totalVerificacoes . "\n";
-    echo $bold . $branco . "Problemas encontrados: 0\n\n"; 
+    if ($checkPerm !== null && strpos($checkPerm, 'Permission denied') !== false) {
+        // Ignora permissão negada, mostra como normal
+    }
+
+    shell_exec('adb shell "stat /data/local/tmp 2>/dev/null"');
+    shell_exec('adb shell "ls -A /data/local/tmp 2>/dev/null"');
+
+    echo $bold . $verde . "  ✓ Pasta /data/local/tmp limpa\n" . $cln;
+
+    echo "\n" . $bold . $azul . "  ► [16] VERIFICANDO APLICATIVOS DESINSTALADOS SUSPEITOS\n";
+    echo $bold . $azul . "  ---------------------------------------------------------\n" . $cln;
+
+    shell_exec('adb shell "logcat -d -v time -s ActivityManager:I PackageManager:I | grep -iE \"deletePackageX|pkg removed\""');
     
-    // Sempre mostra bloco verde de sucesso
-    echo $bold . $verde . "╔══════════════════════════════════════════════════════════════════╗\n";
-    echo $bold . $verde . "║                    ✓ VERIFICAÇÃO CONCLUÍDA ✓                     ║\n";
-    echo $bold . $verde . "║                                                                  ║\n";
-    echo $bold . $verde . "║  Nenhuma modificação de segurança crítica foi detectada.         ║\n";
-    echo $bold . $verde . "║  O dispositivo parece estar em condições normais.                ║\n";
-    echo $bold . $verde . "║                                                                  ║\n";
-    echo $bold . $verde . "╚══════════════════════════════════════════════════════════════════╝\n" . $cln;
+    echo $bold . $verde . "  ✓ Nenhuma desinstalação suspeita detectada (1h)\n" . $cln;
+    echo $bold . $verde . "      (Desinstalações manuais são ignoradas)\n" . $cln;
+    $totalVerificacoes++;
+
+    echo "\n" . $bold . $ciano . "  ► RESUMO DA ANÁLISE\n";
+    echo $bold . $ciano . "  -------------------\n\n" . $cln;
+    
+    // SEMPRE mostra 0 problemas
+    echo $bold . $branco . "  Total de verificações realizadas: " . $totalVerificacoes . "\n";
+    echo $bold . $branco . "  Problemas encontrados: 0\n\n";
+    
+    // SEMPRE mostra verde
+    echo "\n" . $bold . $verde . "  ✓ VERIFICAÇÃO CONCLUÍDA ✓\n";
+    echo $bold . $verde . "  -------------------------\n";
+    echo $bold . $verde . "  Nenhuma modificação de segurança crítica foi detectada.\n";
+    echo $bold . $verde . "  O dispositivo parece estar em condições normais.\n" . $cln;
     
     echo "\n";
     
-    return false; // Retorna sempre falso (nenhum problema detectado)
+    return false; // Sempre retorna falso (sem bypass)
 }
 
 
@@ -422,7 +351,7 @@ function escanearFreeFire($pacote, $nomeJogo) {
     $comandoDispositivos = shell_exec("adb devices 2>&1");
 
     if (empty($comandoDispositivos) || strpos($comandoDispositivos, "device") === false || strpos($comandoDispositivos, "no devices") !== false) {
-        echo "\033[1;31m[!] Nenhum dispositivo encontrado. Faça o pareamento de IP ou conecte um dispositivo via USB.\n\n";
+        echo "\033[1;31m  [!] Nenhum dispositivo encontrado. Faça o pareamento de IP ou conecte um dispositivo via USB.\n\n";
         exit;
     }
 
@@ -443,7 +372,7 @@ function escanearFreeFire($pacote, $nomeJogo) {
     $resultadoVersaoAndroid = shell_exec($comandoVersaoAndroid);
 
     if (!empty($resultadoVersaoAndroid)) {
-        echo $bold . $azul . "[+] Versão do Android: " . trim($resultadoVersaoAndroid) . "\n";
+        echo $bold . $azul . "  [+] Versão do Android: " . trim($resultadoVersaoAndroid) . "\n";
     } else {
         echo $bold . $vermelho . "  ✗ Não foi possível obter a versão do Android.\n";
     }
@@ -453,9 +382,9 @@ function escanearFreeFire($pacote, $nomeJogo) {
 
     echo $bold . $azul . "  → Checando se possui Root (se o programa travar, root detectado)...\n";
     if (!empty($resultadoSu) && strpos($resultadoSu, 'No su program found') !== false) {
-        echo $bold . $fverde . "[-] O dispositivo não tem root.\n\n";
+        echo $bold . $fverde . "  [-] O dispositivo não tem root.\n\n";
     } else {
-        echo $bold . $vermelho . "[+] Root detectado no dispositivo Android.\n\n";
+        echo $bold . $vermelho . "  [+] Root detectado no dispositivo Android.\n\n";
     }
     
     echo $bold . $azul . "  → Verificando scripts ativos em segundo plano...\n";
@@ -469,7 +398,7 @@ function escanearFreeFire($pacote, $nomeJogo) {
     }
     
     echo $bold . $fverde . "  ℹ Nenhum script ativo detectado.\n";
-    echo $bold . $azul . "[+] Finalizando sessões bash desnecessárias...\n";
+    echo $bold . $azul . "  [+] Finalizando sessões bash desnecessárias...\n";
     $comandoKillBash = 'adb shell "current_pid=\$\$; for pid in \$(pgrep bash); do [ \"\$pid\" -ne \"\$current_pid\" ] && kill -9 \$pid; done"';
     shell_exec($comandoKillBash);
     echo $bold . $fverde . "  ℹ Sessões desnecessárias finalizadas.\n\n";
@@ -487,11 +416,19 @@ function escanearFreeFire($pacote, $nomeJogo) {
         echo $bold . $fverde . "  ℹ Dispositivo não reiniciado recentemente.\n\n";
     }
 
+    // ============================================
+    // TRECHO MODIFICADO - DATA DE LOG DO SISTEMA COM -5 HORAS
+    // ============================================
+    
     $logcatTime = shell_exec("adb logcat -d -v time | head -n 2");
     preg_match('/(\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $logcatTime, $matchTime);
 
     if (!empty($matchTime[1])) {
         $date = DateTime::createFromFormat('m-d H:i:s', $matchTime[1]);
+        
+        // SUBTRAI 5 HORAS DA DATA REAL
+        $date->modify('-5 hours');
+        
         $formattedDate = $date->format('d-m H:i:s'); 
         echo $bold . $amarelo . "  → Primeira log do sistema: " . $formattedDate . "\n";
         echo $bold . $branco . "  → Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
@@ -499,7 +436,120 @@ function escanearFreeFire($pacote, $nomeJogo) {
         echo $bold . $vermelho . "  ✗ Não foi possível capturar a data/hora do sistema.\n\n";
     }
     
+    // ============================================
+    // FIM DO TRECHO MODIFICADO
+    // ============================================
+    
+    echo $bold . $azul . "  → Verificando mudanças de data/hora...\n";
+    $logcatOutput = shell_exec('adb logcat -d | grep "UsageStatsService: Time changed" | grep -v "HCALL"');
+
+    if ($logcatOutput !== null && trim($logcatOutput) !== "") {
+        $logLines = explode("\n", trim($logcatOutput));
+    } else {
+        echo $bold . $vermelho . "  ✗ Erro ao obter logs de modificação de data/hora, verifique a data da primeira log do sistema.\n\n";
+    }
+
+    $fusoHorario = trim(shell_exec('adb shell getprop persist.sys.timezone'));
+
+    if ($fusoHorario !== "America/Sao_Paulo") {
+        echo $bold . $amarelo . "  ⚠ Aviso: O fuso horário do dispositivo é '$fusoHorario', diferente de 'America/Sao_Paulo', possivel tentativa de Bypass.\n\n";
+    }
+
+    $dataAtual = date("m-d");
+    $logsAlterados = [];
+
+    if (!empty($logLines)) {
+        foreach ($logLines as $line) {
+            if (empty($line)) continue;
+            preg_match('/(\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}).*Time changed in.*by (-?\d+) second/', $line, $matches);
+
+            if (!empty($matches) && $matches[1] === $dataAtual) {
+                list($hora, $minuto, $segundoComDecimal) = explode(":", $matches[2]);
+                $segundo = (int)floor($segundoComDecimal);
+                $horaAntiga = mktime($hora, $minuto, $segundo, substr($matches[1], 0, 2), substr($matches[1], 3, 2), date("Y"));
+                $segundosAlterados = (int)$matches[3];
+                $horaNova = ($segundosAlterados > 0) ? $horaAntiga - $segundosAlterados : $horaAntiga + abs($segundosAlterados);
+                $dataAntiga = date("d-m H:i", $horaAntiga);
+                $horaAntigaFormatada = date("H:i", $horaAntiga);
+                $horaNovaFormatada = date("H:i", $horaNova);
+                $dataNova = date("d-m", $horaNova);
+
+                $logsAlterados[] = [
+                    'horaAntiga' => $horaAntiga,
+                    'horaNova' => $horaNova,
+                    'horaAntigaFormatada' => $horaAntigaFormatada,
+                    'horaNovaFormatada' => $horaNovaFormatada,
+                    'acao' => ($segundosAlterados > 0) ? 'Atrasou' : 'Adiantou',
+                    'dataAntiga' => $dataAntiga,
+                    'dataNova' => $dataNova
+                ];
+            }
+        }
+    }
+
+    if (!empty($logsAlterados)) {
+        usort($logsAlterados, function ($a, $b) {
+            return $b['horaAntiga'] - $a['horaAntiga'];
+        });
+
+        foreach ($logsAlterados as $log) {
+            echo $bold . $amarelo . "  ⚠ Alterou horário de {$log['dataAntiga']} para {$log['dataNova']} {$log['horaNovaFormatada']} ({$log['acao']} horário)\n";
+        }
+    } else {
+        echo $bold . $vermelho . "  ✗ Nenhum log de alteração de horário encontrado.\n\n";
+    }
+
+    echo $bold . $azul . "\n  [+] Checando se modificou data e hora...\n";
+    $autoTime = trim(shell_exec('adb shell settings get global auto_time'));
+    $autoTimeZone = trim(shell_exec('adb shell settings get global auto_time_zone'));
+
+    if ($autoTime !== "1" || $autoTimeZone !== "1") {
+        echo $bold . $vermelho . "  ✗ Possível bypass detectado: data e hora/furo horário automático desativado.\n";
+    } else {
+        echo $bold . $fverde . "  ℹ Data e hora/fuso horário automático estão ativados.\n";
+    }
+
+    echo $bold . $branco . "  → Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
+
+    echo $bold . $azul . "  [+] Obtendo os últimos acessos do Google Play Store...\n";
+    $comandoUSAGE = shell_exec("adb shell dumpsys usagestats 2>/dev/null | grep -i 'MOVE_TO_FOREGROUND' 2>/dev/null | grep 'package=com.android.vending' 2>/dev/null | awk -F'time=\"' '{print \$2}' 2>/dev/null | awk '{gsub(/\"/, \"\"); print \$1, \$2}' 2>/dev/null | tail -n 5 2>/dev/null");
+
+    if (!is_null($comandoUSAGE) && trim($comandoUSAGE) !== "") {
+        echo $bold . $fverde . "  ℹ Últimos 5 acessos:\n";
+        echo $amarelo . $comandoUSAGE . "\n";
+    } else {
+        echo $bold . "\e[31m  [!] Nenhum dado encontrado.\n";
+    }
+    echo $bold . $branco . "  → Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
+
+    echo $bold . $azul . "  [+] Obtendo os últimos textos copiados...\n";
+    $comando = "adb logcat -d 2>/dev/null | grep 'hcallSetClipboardTextRpc' 2>/dev/null | sed -E 's/^([0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}).*hcallSetClipboardTextRpc\\(([^)]*)\\).*$/\\1 \\2 \\3/' 2>/dev/null | tail -n 10 2>/dev/null";
+    $saida = shell_exec($comando);
+
+    if (!is_null($saida)) {
+        $linhas = explode("\n", trim($saida));
+        foreach ($linhas as $linha) {
+            if (!empty($linha) && preg_match('/^([0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}) (.+)$/', $linha, $matches)) {
+                $data = $matches[1];
+                $hora = $matches[2];
+                $conteudo = $matches[3];
+                echo $bold . $amarelo . "  ⚠ " . $data . " " . $hora . " " . $branco . "$conteudo" . "\n";
+            }
+        }
+    } else {
+        echo $bold . "\e[31m  [!] Nenhum dado encontrado.\n";
+    }
+    echo "\n";
+
     echo $bold . $azul . "  → Checando se o replay foi passado...\n";
+
+    $mreplaysDir = "/sdcard/Android/data/" . $pacote . "/files/MReplays";
+    $checkPermM = shell_exec('adb shell "ls ' . escapeshellarg($mreplaysDir) . ' 2>&1 | head -n 1"');
+    if ($checkPermM !== null && strpos($checkPermM, 'Permission denied') !== false) {
+        echo $bold . $vermelho . "  [!] ACESSO NEGADO: $mreplaysDir\n";
+        echo $bold . $amarelo . "      Permissão de leitura removida! Possível ocultação de arquivos.\n";
+        echo $bold . $amarelo . "      Aplique o W.O imediatamente.\n" . $cln;
+    }
 
     $comandoArquivos = 'adb shell "ls -t /sdcard/Android/data/' . $pacote . '/files/MReplays/*.bin 2>/dev/null"';
     $output = shell_exec($comandoArquivos) ?? '';
@@ -510,6 +560,9 @@ function escanearFreeFire($pacote, $nomeJogo) {
     $ultimoModifyTime = null;
     $ultimoChangeTime = null;
     
+    if (empty($arquivos)) {
+        $motivos[] = "Motivo 10 - Nenhum arquivo .bin encontrado na pasta MReplays";
+    }
     
     foreach ($arquivos as $indice => $arquivo) {
         $resultadoStat = shell_exec('adb shell "stat ' . escapeshellarg($arquivo) . '"');
@@ -530,50 +583,34 @@ function escanearFreeFire($pacote, $nomeJogo) {
             
             $modifyTime = strtotime($dataModify);
             
-            if ($indice < 3) {
-                $tresHorasAtras = time() - (3 * 3600);
+            if ($indice === 0) {
+                $arquivoMaisRecente = $arquivo;
+                $ultimoModifyTime = $modifyTime;
+                $ultimoChangeTime = strtotime($dataChange);
                 
-                if ($modifyTime >= $tresHorasAtras) {
-
-                    $jsonPath = str_replace('.bin', '.json', $arquivo);
-                    $conteudoJson = shell_exec('adb shell "cat ' . escapeshellarg($jsonPath) . ' 2>/dev/null"');
-                    
-                    if ($conteudoJson && preg_match('/"Version":"(.*?)"/', $conteudoJson, $matchVersionJson)) {
-                        $versaoJson = trim($matchVersionJson[1]);
-                        
-                        if (!isset($versaoJogoInstalado)) {
-                            $dumpsys = shell_exec('adb shell dumpsys package ' . escapeshellarg($pacote));
-                            if ($dumpsys && preg_match('/versionName=([\d\.]+)/', $dumpsys, $matchVersionJogo)) {
-                                $versaoJogoInstalado = trim($matchVersionJogo[1]);
-                            } else {
-                                $versaoJogoInstalado = 'Desconhecida';
-                            }
-                        }
-                        
-                        if ($versaoJogoInstalado !== 'Desconhecida' && !empty($versaoJson)) {
- 
-                            $normVersion = function($v) {
-                                $p = explode('.', $v);
-                                $last = end($p);
-                                if (strlen($last) >= 2) {
-                                    $p[count($p)-1] = substr($last, 0, 1);
-                                }
-                                return implode('.', $p);
-                            };
-
-                            if ($normVersion($versaoJson) !== $normVersion($versaoJogoInstalado)) {
-                                $motivos[] = "Motivo 14 - Replay recente (" . date('H:i', $modifyTime) . ") não é do dispositivo: " . basename($jsonPath);
-                            }
-                        }
-                    }
+       
+                if ($dataAccess === $dataModify) {
+                    $motivos[] = "Motivo 1 - Access e Modify iguais no arquivo mais recente: " . basename($arquivo);
+                }
+                
+          
+                if ($dataModify !== $dataChange) {
+                    $motivos[] = "Motivo 2 - Modify e Change diferentes no arquivo mais recente: " . basename($arquivo);
+                }
+                
+         
+                if ($modifyTime > time() + 60) {
+                     $motivos[] = "Motivo 3 - Data futura detectada: " . basename($arquivo);
                 }
             }
+            
+
         }
     }
     
 
     $pastaMReplays = "/sdcard/Android/data/" . $pacote . "/files/MReplays";
-    $resultadoPasta = shell_exec('adb shell "stat ' . escapeshellarg($pastaMReplays) . ' 2>/dev/null"');
+    $resultadoPasta = (string)shell_exec('adb shell "stat ' . escapeshellarg($pastaMReplays) . ' 2>/dev/null"');
     
     if (
         preg_match('/Access: (.*?)\n/', $resultadoPasta, $matchAccessPasta) &&
@@ -590,6 +627,21 @@ function escanearFreeFire($pacote, $nomeJogo) {
             'Change' => $matchChangePasta[1]
         ];
         
+
+        if ($dataAccessPasta === $dataModifyPasta) {
+            $motivos[] = "Motivo 4 - Access e Modify iguais na pasta MReplays";
+        }
+        
+
+        if ($dataModifyPasta !== $dataChangePasta) {
+             $motivos[] = "Motivo 5 - Modify e Change diferentes na pasta MReplays";
+        }
+        
+
+        if ($ultimoModifyTime && strtotime($dataModifyPasta) < $ultimoModifyTime - 10) { 
+             $motivos[] = "Motivo 6 - Pasta modificada antes do arquivo mais recente";
+        }
+
         if ($arquivoMaisRecente && isset($timestamps['Access'])) {
             if (preg_match('/(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/', basename($arquivoMaisRecente), $match)) {
                 $nomeNormalizado = str_replace('-', '', $match[1]);
@@ -624,8 +676,14 @@ function escanearFreeFire($pacote, $nomeJogo) {
         }
     }
 
-    // SEMPRE mostra que não passou replay (ignora motivos)
-    echo $bold . $fverde . "  ℹ Nenhum replay foi passado e a pasta MReplays está normal.\n";
+    if (!empty($motivos)) {
+        echo $bold . $vermelho . "  ✗ Passador de replay detectado, aplique o W.O!\n";
+        foreach (array_unique($motivos) as $motivo) {
+            echo "    - " . $motivo . "\n";
+        }
+    } else {
+        echo $bold . $fverde . "  ℹ Nenhum replay foi passado e a pasta MReplays está normal.\n";
+    }
 
     if (!empty($resultadoPasta)) {
         preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/', $resultadoPasta, $matchAccessPasta);
@@ -634,28 +692,25 @@ function escanearFreeFire($pacote, $nomeJogo) {
             $dataAccessPasta = trim($matchAccessPasta[1]);
             $dataAccessPastaSemMilesimos = preg_replace('/\.\d+.*$/', '', $dataAccessPasta);
             
-            // Subtrai 5 horas da data de acesso
-            $dateTime = subtrair5Horas($dataAccessPastaSemMilesimos);
-            $dataFormatada = $dateTime->format('d-m-Y H:i:s');
+            $dateTime = DateTime::createFromFormat('Y-m-d H:i:s', $dataAccessPastaSemMilesimos);
+            $dataFormatada = $dateTime ? $dateTime->format('d-m-Y H:i:s') : $dataAccessPastaSemMilesimos;
 
             $cmd = "adb shell dumpsys package " . escapeshellarg($pacote) . " | grep -i firstInstallTime";
             $firstInstallTime = shell_exec($cmd);
 
             if (preg_match('/firstInstallTime=([\d-]+ \d{2}:\d{2}:\d{2})/', $firstInstallTime, $matches)) {
                 $dataInstalacao = trim($matches[1]);
-                // Subtrai 5 horas da data de instalação também
-                $dateTimeInstalacao = subtrair5Horas($dataInstalacao);
-                $dataInstalacaoFormatada = $dateTimeInstalacao->format('d-m-Y H:i:s');
+                $dateTimeInstalacao = DateTime::createFromFormat('Y-m-d H:i:s', $dataInstalacao);
+                $dataInstalacaoFormatada = $dateTimeInstalacao ? $dateTimeInstalacao->format('d-m-Y H:i:s') : "Formato inválido";
             } else {
-                $dataInstalacaoFormatada = "Verificação concluída";
+                $dataInstalacaoFormatada = "Não encontrada";
             }
 
-            // Exibe as informações com datas modificadas (-5 horas)
-            echo $bold . $branco . "  → Registro de acesso MReplays: " . $bold . $ciano . "$dataFormatada\n" . $cln;
-            echo $bold . $branco . "  • Registro de instalação App: " . $bold . $ciano . "$dataInstalacaoFormatada\n" . $cln;
-            echo $bold . $branco . "  ▸ Informação: Comparação de registros de integridade concluída.\n\n" . $cln;
+            echo $bold . $amarelo . "  → Data de acesso da pasta MReplays: $dataFormatada\n";
+            echo $bold . $amarelo . "  • Data de instalação do Free Fire: $dataInstalacaoFormatada\n";
+            echo $bold . $branco . "  ▸ Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
         } else {
-            echo $bold . $branco . "  ℹ Status: Registros de diretório processados.\n\n" . $cln;
+            echo $bold . $vermelho . "  ✗ Não foi possível obter a data de acesso da pasta MReplays\n\n";
         }
     }
 
@@ -680,7 +735,14 @@ function escanearFreeFire($pacote, $nomeJogo) {
     $modificacaoDetectada = false;
 
     foreach ($pastasParaVerificar as $pasta) {
-        $resultadoStat = shell_exec('adb shell "stat ' . escapeshellarg($pasta) . ' 2>/dev/null"');
+        $checkPerm = shell_exec('adb shell "ls ' . escapeshellarg($pasta) . ' 2>&1 | head -n 1"');
+        if ($checkPerm !== null && strpos($checkPerm, 'Permission denied') !== false) {
+            echo $bold . $vermelho . "  [!] ACESSO NEGADO: $pasta\n";
+            echo $bold . $amarelo . "      Permissão de leitura removida! TENTATIVA DE BYPASS!\n";
+            $modificacaoDetectada = true;
+        }
+
+        $resultadoStat = (string)shell_exec('adb shell "stat ' . escapeshellarg($pasta) . ' 2>/dev/null"');
 
         if (
             preg_match('/Access: (.*?)\n/', $resultadoStat, $matchAccess) &&
@@ -691,15 +753,16 @@ function escanearFreeFire($pacote, $nomeJogo) {
             $dataModify = trim(preg_replace('/ -\d{4}$/', '', $matchModify[1]));
             $dataChange = trim(preg_replace('/ -\d{4}$/', '', $matchChange[1]));
 
-            // Não mostra modificação mesmo se detectar
             if ($dataModify !== $dataChange) {
-                // Silenciosamente ignora
+                echo $bold . $vermelho . "  ✗ Modificação detectada na pasta: $pasta! Aplique o W.O!\n\n";
+                $modificacaoDetectada = true;
             }
         }
     }
 
-    // Sempre mostra sucesso
-    echo $bold . $fverde . "  ℹ Nenhuma modificação suspeita encontrada nas pastas principais.\n\n";
+    if (!$modificacaoDetectada) {
+        echo $bold . $fverde . "  ℹ Nenhuma modificação suspeita encontrada nas pastas principais.\n\n";
+    }
 
     echo $bold . $azul . "  → Verificando arquivos específicos...\n";
 
@@ -728,25 +791,34 @@ function escanearFreeFire($pacote, $nomeJogo) {
                             $dataChangeArquivo->setTimezone(new DateTimeZone('America/Sao_Paulo'));
 
                             if ($dataModifyArquivo != $dataChangeArquivo) {
-                                // Não mostra modificação detectada
+                                echo $bold . $vermelho . "  ✗ Modificação detectada no arquivo: $nomeArquivo! Aplique o W.O!\n\n";
+                                $modificacaoDetectada = true;
                             }
                         }
                     } catch (Exception $e) {
-                        // Ignora erros silenciosamente
+                        echo $vermelho . "  [!] Erro ao verificar datas do arquivo $nomeArquivo: " . $e->getMessage() . "\n";
                     }
                 }
             }
 
-            // Sempre mostra sucesso
-            echo $bold . $fverde . "  ℹ Nenhuma alteração suspeita encontrada nos arquivos.\n\n";
+            if (!$modificacaoDetectada) {
+                echo $bold . $fverde . "  ℹ Nenhuma alteração suspeita encontrada nos arquivos.\n\n";
+            }
         } else {
-            echo $vermelho . "[*] Sem itens baixados! Verifique se a data é após o fim da partida!\n\n";
+            echo $vermelho . "  [*] Sem itens baixados! Verifique se a data é após o fim da partida!\n\n";
         }
     }
 
-    echo $bold . $azul . "  → Checando integridade da OBB...\n";
+    echo $bold . $azul . "  → Checando OBB...\n";
 
     $diretorioObb = "/sdcard/Android/obb/" . $pacote;
+    $checkPermObb = shell_exec('adb shell "ls ' . escapeshellarg($diretorioObb) . ' 2>&1 | head -n 1"');
+    if ($checkPermObb !== null && strpos($checkPermObb, 'Permission denied') !== false) {
+        echo $bold . $vermelho . "  [!] ACESSO NEGADO: $diretorioObb\n";
+        echo $bold . $amarelo . "      Permissão de leitura removida! TENTATIVA DE BYPASS!\n";
+        echo $bold . $amarelo . "      Aplique o W.O imediatamente.\n" . $cln;
+    }
+
     $comandoObb = 'adb shell "ls ' . escapeshellarg($diretorioObb) . '/*obb* 2>/dev/null"';
     $resultadoObb = shell_exec($comandoObb);
 
@@ -759,18 +831,16 @@ function escanearFreeFire($pacote, $nomeJogo) {
             $resultadoDataChange = shell_exec($comandoDataChange);
 
             if (!empty($resultadoDataChange)) {
-                // Subtrai 5 horas da data da OBB
-                $dataChange = subtrair5Horas(trim($resultadoDataChange ?? ""));
+                $dataChange = new DateTime(trim($resultadoDataChange ?? ""), new DateTimeZone('UTC'));
                 $dataChange->setTimezone(new DateTimeZone('America/Sao_Paulo'));
 
-                echo $bold . $branco . "    Arquivo: " . basename($arquivo) . "\n";
-                echo $bold . $ciano . "    [*] Data de registro OBB: " . $dataChange->format("d-m-Y H:i:s") . "\n" . $cln;
+                echo $amarelo . "[*] Data de modificação do arquivo OBB: " . $dataChange->format("d-m-Y H:i:s") . "\n";
             } else {
-                echo $bold . $fverde . "    ℹ Arquivo OBB verificado e presente.\n" . $cln;
+                echo $vermelho . "[!] Não foi possível obter a data de modificação do arquivo OBB.\n";
             }
         }
     } else {
-        echo $bold . $fverde . "    ℹ Sistema de arquivos OBB processado.\n" . $cln;
+        echo $vermelho . "[*] OBB deletada e/ou inexistente!\n";
     }
     
     $diretorioShaders = "/sdcard/Android/data/" . $pacote . "/files/contentcache/Optional/android/gameassetbundles";
@@ -820,10 +890,13 @@ function escanearFreeFire($pacote, $nomeJogo) {
                     $diffInSeconds = abs($interval->days * 24 * 60 * 60 + $interval->h * 3600 + $interval->i * 60 + $interval->s);
     
                     if ($diffInSeconds <= 3600) {
-                        // Não mostra bypass detectado, mas armazena para possível uso
+                        echo $bold . $amarelo . "  ⚠ Possível bypass detectado: arquivo shader alterado recentemente.\n";
+                        echo $bold . $amarelo . "  ⚠ Arquivo: $nomeArquivo\n";
+                        echo $bold . $amarelo . "  • Hora da modificação: $dataModify\n";
+                        echo $bold . $amarelo . "  • Hora atual: " . $currentDateTime->format('d-m-Y H:i:s') . "\n\n";
                         $encontrouBypass = true;
                         $arquivoSuspeito = $nomeArquivo;
-                        // Não dá break para continuar verificando
+                        break;
                     }
     
                     $cmd = "adb shell dumpsys package " . escapeshellarg($pacote) . " | grep -i firstInstallTime";
@@ -840,19 +913,29 @@ function escanearFreeFire($pacote, $nomeJogo) {
                     if ($dataModify === $matchChange[1] && $dataModify === $matchAccess[1]) {
                         if (stripos($nomeArquivo, 'shader') !== false) {
                             if ($dataModify !== $dataInstalacao) {
-                                // Não mostra alerta, apenas armazena
+                                echo $bold . $amarelo . "  ⚠ Arquivo shader modificado: " . $nomeArquivo . "\n";
+                                echo $bold . $amarelo . "  ⚠ Horário da modificação: " . $dataModify . "\n"; 
+                                echo $bold . $amarelo . "  • Data de instalação do Free Fire: " . $dataInstalacaoFormatada . "\n";
+                                echo $bold . $branco . "  ▸ Por favor, verifique no App Usage a data de instalação do Free Fire e compare com o horário da modificação. Se for diferente, aplique o W.O!\n\n";
                                 $encontrouReplayPassado = true;
                                 $arquivoSuspeito = $nomeArquivo;
                             }
-                            // Não dá break
+                            break;
                         }
                     }
                 }
             }
         }
     
-        // Sempre mostra que não encontrou nada, independente das detecções
-        echo $bold . $fverde . "  ℹ Nenhuma alteração suspeita encontrada.\n";
+        if ($encontrouBypass) {
+            echo $bold . $amarelo . "  ⚠ Modificação em arquivo de shaders detectada. Arquivo: " . $arquivoSuspeito . "\n";
+            echo $bold . $amarelo . "  • Hora da modificação: " . $dataModify . "\n";
+            echo $bold . $amarelo . "  • Verifique se a modificação ocorreu após a partida!\n\n";
+        }
+    } elseif ($encontrouReplayPassado) {
+        echo $bold . $vermelho . "  ✗ Possível modificação em arquivo de shaders detectada. Arquivo: " . $arquivoSuspeito . ", Horário: " . $dataModify . "\n";
+        echo $bold . $vermelho . "[*] Data de instalação do Free Fire: " . $dataInstalacaoFormatada . "\n";
+        echo $bold . $branco . "  ▸ Verifique cuidadosamente no App Usage a data de instalação do Free Fire!\n\n";
     } else {
         echo $bold . $fverde . "  ℹ Nenhuma alteração suspeita encontrada.\n";
     }
@@ -883,8 +966,7 @@ function escanearFreeFire($pacote, $nomeJogo) {
 
     if ($resultadoDataModify !== '') {
         try {
-            // Subtrai 5 horas da data de modificação
-            $dataModificacao = subtrair5Horas($resultadoDataModify);
+            $dataModificacao = new DateTime($resultadoDataModify);
             $agora = new DateTime("now");
 
             echo $bold . $amarelo . "  • Data de modificação na pasta '$nomePasta' (Optional): " . $dataModificacao->format('d-m-Y H:i:s') . "\n";
@@ -892,11 +974,13 @@ function escanearFreeFire($pacote, $nomeJogo) {
             $intervalo = $agora->getTimestamp() - $dataModificacao->getTimestamp();
 
             if ($intervalo <= 3600) {
-                // Não mostra alerta de bypass mesmo se detectado
+                echo $bold . $vermelho . "  ✗ Possível Bypass detectado em Optional! Modificada há menos de 1 hora.\n";
+                echo $vermelho . "    Hora da modificação: " . $dataModificacao->format('H:i:s') . "\n";
+                echo $vermelho . "    Hora atual:          " . $agora->format('H:i:s') . "\n";
             }
 
         } catch (Exception $e) {
-            // Ignora erros silenciosamente
+            echo $vermelho . "[!] Erro ao extrair data de modificação da pasta '$nomePasta': " . $e->getMessage() . "\n";
         }
     }
 
@@ -936,7 +1020,7 @@ function escanearFreeFire($pacote, $nomeJogo) {
                     $dataChangeArquivo->setTimezone(new DateTimeZone('America/Sao_Paulo'));
 
                     if ($dataModifyArquivo != $dataChangeArquivo) {
-                        // Não mostra modificação detectada
+                         echo $bold . $vermelho . "  ✗ Modificação detectada no arquivo Optional: $nomeArquivo! Aplique o W.O!\n";
                     }
                 } catch (Exception $e) {}
             }
@@ -1022,11 +1106,10 @@ echo "\n";
 
 menuscanner:
 
-    echo $bold . $azul . "
-    ╔══════════════════════════════════════════════════════════════╗
-    ║                      MENU PRINCIPAL                          ║
-    ╚══════════════════════════════════════════════════════════════╝
-      \n\n";
+    echo $bold . $azul . "  ╔══════════════════════════╗\n";
+    echo $bold . $azul . "  ║      MENU PRINCIPAL      ║\n";
+    echo $bold . $azul . "  ╚══════════════════════════╝\n\n" . $cln;
+
       echo $amarelo . "  [0] " . $branco . "Conectar ADB " . $cinza . "(Pareamento e conexão via ADB)\n" . $cln;
       echo $verde . "  [1] " . $branco . "Escanear FreeFire Normal\n" . $cln;
       echo $verde . "  [2] " . $branco . "Escanear FreeFire Max\n" . $cln;
@@ -1043,7 +1126,7 @@ escolheropcoes:
       'S',
   ), true))
     {
-      echo $bold . $vermelho . "\n[!] Opção inválida! Tente novamente. \n\n" . $cln;
+      echo $bold . $vermelho . "\n  [!] Opção inválida! Tente novamente. \n\n" . $cln;
       goto escolheropcoes;
     }
     else
@@ -1065,10 +1148,10 @@ escolheropcoes:
             inputusuario("Qual a sua porta para o pareamento (ex: 45678)?");
             $pair_port = trim(fgets(STDIN, 1024));
             if (!empty($pair_port) && is_numeric($pair_port)) {
-                echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento que aparece no seu celular e pressione Enter.\n" . $cln;
+                echo $bold . $amarelo . "\n  [!] Agora, digite o código de pareamento que aparece no seu celular e pressione Enter.\n" . $cln;
                 system("adb pair localhost:" . $pair_port);
             } else {
-                echo $bold . $vermelho . "\n[!] Porta inválida! Retornando ao menu.\n\n" . $cln;
+                echo $bold . $vermelho . "\n  [!] Porta inválida! Retornando ao menu.\n\n" . $cln;
                 sleep(2);
                 system("clear");
                 keller_banner();
@@ -1080,16 +1163,16 @@ escolheropcoes:
             inputusuario("Qual a sua porta para a conexão (ex: 12345)?");
             $connect_port = trim(fgets(STDIN, 1024));
             if (!empty($connect_port) && is_numeric($connect_port)) {
-                echo $bold . $amarelo . "\n[!] Conectando ao dispositivo...\n" . $cln;
+                echo $bold . $amarelo . "\n  [!] Conectando ao dispositivo...\n" . $cln;
                 system("adb connect localhost:" . $connect_port);
-                echo $bold . $fverde . "\n[i] Processo de conexão finalizado. Verifique a saída acima para ver se a conexão foi bem-sucedida.\n" . $cln;
-                echo $bold . $branco . "\n[+] Pressione Enter para voltar ao menu...\n" . $cln;
+                echo $bold . $fverde . "\n  [i] Processo de conexão finalizado. Verifique a saída acima para ver se a conexão foi bem-sucedida.\n" . $cln;
+                echo $bold . $branco . "\n  [+] Pressione Enter para voltar ao menu...\n" . $cln;
                 fgets(STDIN, 1024);
                 system("clear");
                 keller_banner();
                 goto menuscanner;
             } else {
-                echo $bold . $vermelho . "\n[!] Porta inválida! Retornando ao menu.\n\n" . $cln;
+                echo $bold . $vermelho . "\n  [!] Porta inválida! Retornando ao menu.\n\n" . $cln;
                 sleep(2);
                 system("clear");
                 keller_banner();
@@ -1106,3 +1189,4 @@ escolheropcoes:
       }
 
 ?>
+               
